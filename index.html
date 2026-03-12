@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Passi City College | SOICT Grading System</title>
+    <style>
+        /* --- CSS VARIABLES & RESET --- */
+        :root {
+            --neon-red: #ff003c;
+            --neon-red-dim: #8a001f;
+            --bg-dark: #050505;
+            --bg-panel: #0f0f0f;
+            --text-main: #e0e0e0;
+            --text-dim: #888;
+            --grid-color: rgba(255, 0, 60, 0.05);
+            --font-main: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            --font-mono: 'Courier New', Courier, monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: var(--font-main);
+            /* Cyberpunk Grid Background */
+            background-image: 
+                linear-gradient(var(--grid-color) 1px, transparent 1px),
+                linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+            background-size: 40px 40px;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        /* --- LAYOUT CONTAINER --- */
+        .cyber-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            border: 1px solid var(--neon-red-dim);
+            background: rgba(15, 15, 15, 0.9);
+            box-shadow: 0 0 20px rgba(255, 0, 60, 0.1);
+            padding: 30px;
+            position: relative;
+        }
+
+        /* Decorative corner accents */
+        .cyber-container::before {
+            content: '';
+            position: absolute;
+            top: -2px; left: -2px;
+            width: 20px; height: 20px;
+            border-top: 3px solid var(--neon-red);
+            border-left: 3px solid var(--neon-red);
+        }
+        .cyber-container::after {
+            content: '';
+            position: absolute;
+            bottom: -2px; right: -2px;
+            width: 20px; height: 20px;
+            border-bottom: 3px solid var(--neon-red);
+            border-right: 3px solid var(--neon-red);
+        }
+
+        /* --- HEADER --- */
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            border-bottom: 2px solid var(--neon-red);
+            padding-bottom: 20px;
+        }
+
+        h1 {
+            color: var(--neon-red);
+            font-size: 2.5rem;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            text-shadow: 0 0 10px var(--neon-red);
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: var(--text-dim);
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+        }
+
+        /* --- STUDENT INFO SECTION --- */
+        .student-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+            background: rgba(255, 0, 60, 0.05);
+            padding: 20px;
+            border: 1px solid var(--neon-red-dim);
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            color: var(--neon-red);
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+
+        input[type="text"], input[type="number"] {
+            background: #000;
+            border: 1px solid #333;
+            color: #fff;
+            padding: 10px;
+            font-family: var(--font-mono);
+            outline: none;
+            transition: 0.3s;
+        }
+
+        input:focus {
+            border-color: var(--neon-red);
+            box-shadow: 0 0 10px rgba(255, 0, 60, 0.3);
+        }
+
+        /* --- SUBJECTS TABLE --- */
+        .subjects-panel {
+            margin-bottom: 30px;
+        }
+
+        .panel-title {
+            color: #fff;
+            margin-bottom: 15px;
+            border-left: 4px solid var(--neon-red);
+            padding-left: 10px;
+            text-transform: uppercase;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-family: var(--font-mono);
+        }
+
+        th {
+            text-align: left;
+            padding: 15px;
+            color: var(--neon-red);
+            border-bottom: 2px solid var(--neon-red);
+            background: rgba(255, 0, 60, 0.1);
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #333;
+        }
+
+        tr:hover td {
+            background: rgba(255, 0, 60, 0.05);
+        }
+
+        /* --- ACTION BUTTONS --- */
+        .action-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 40px;
+            justify-content: center;
+        }
+
+        .cyber-btn {
+            background: transparent;
+            color: var(--neon-red);
+            border: 1px solid var(--neon-red);
+            padding: 12px 24px;
+            font-family: var(--font-mono);
+            font-weight: bold;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: 0.3s;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 5px var(--neon-red);
+        }
+
+        .cyber-btn:hover {
+            background: var(--neon-red);
+            color: #000;
+            box-shadow: 0 0 20px var(--neon-red);
+        }
+
+        .cyber-btn.secondary {
+            border-color: #fff;
+            color: #fff;
+            box-shadow: 0 0 5px #fff;
+        }
+        .cyber-btn.secondary:hover {
+            background: #fff;
+            color: #000;
+            box-shadow: 0 0 20px #fff;
+        }
+
+        /* --- VIEW GRADES SECTION (Hidden by default) --- */
+        #viewGradesSection {
+            display: none; /* Hidden initially */
+            border: 2px solid var(--neon-red);
+            padding: 30px;
+            background: rgba(0,0,0,0.8);
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .grade-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .grade-card {
+            border: 1px solid #333;
+            padding: 20px;
+            position: relative;
+        }
+
+        .grade-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 2px;
+            background: var(--neon-red);
+        }
+
+        .grade-card h4 {
+            color: var(--text-dim);
+            margin-bottom: 10px;
+            font-family: var(--font-mono);
+        }
+
+        .grade-value {
+            font-size: 2rem;
+            color: #fff;
+            font-weight: bold;
+        }
+
+        .grade-remark {
+            color: var(--neon-red);
+            font-weight: bold;
+            margin-top: 5px;
+            text-transform: uppercase;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .student-info { grid-template-columns: 1fr; }
+            .action-bar { flex-direction: column; }
+            .cyber-btn { width: 100%; text-align: center; }
+        }
+        style>
+  body {
+    font-family: Arial, sans-serif;
+    margin: 30px;
+    background: #f5f5f5;
+    text-align: center;
+  }
+  input[type=number] {
+    padding: 8px;
+    width: 150px;
+    font-size: 1em;
+  }
+  button {
+    padding: 8px 15px;
+    font-size: 1em;
+    margin-left: 8px;
+    cursor: pointer;
+  }
+  .result {
+    margin-top: 20px;
+    font-size: 1.3em;
+    font-weight: bold;
+  }
+  .note {
+    margin-top: 40px;
+    font-style: italic;
+    font-size: 0.95em;
+    color: #555;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+    </style>
+</head>
+<body>
+
+    <div class="cyber-container">
+        <header>
+            <h1>Passi City College</h1>
+            <div class="subtitle">SOICT OFFICIAL GRADING SYSTEM // INFORMATION TECHNOLOGY</div>
+        </header>
+
+        <!-- Student Information -->
+        <div class="student-info">
+            <div class="input-group">
+                <label>Full Name</label>
+                <input type="text" id="studentName" placeholder="Enter Student Name">
+            </div>
+            <div class="input-group">
+                <label>Section</label>
+                <input type="text" id="studentSection" placeholder="e.g. IT-3C">
+            </div>
+            <div class="input-group">
+                <label>Student ID</label>
+                <input type="text" id="studentId" placeholder="023-XXXX">
+            </div>
+            <div class="input-group">
+                <label>Academic Year</label>
+                <input type="text" id="academicYear" placeholder="2025-2026">
+            </div>
+             <div class="input-group">
+                <label>Add Subject</label>
+                <input type="text" id="subjectInput" placeholder=" Add subject ">
+            </div>
+        </div>
+        <div class="action-bar">
+            <button class="cyber-btn secondary" style="border-color: #ff003c; color: #ff003c;" onclick="addSubject()">Add Subject</button>
+            <button class="cyber-btn" onclick="saveRecord()">Save Record</button>
+            <button class="cyber-btn secondary" style="border-color: #ff003c; color: #ff003c;" onclick="editRecord()">Edit</button>
+            <button class="cyber-btn secondary" style="border-color: #ff003c; color: #ff003c;" onclick="deleteRecord()">Delete</button>
+        </div>
+
+        <!-- Subject Entry Table -->
+        <div class="subjects-panel">
+            <h3 class="panel-title">Subject Grade Entry</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Subject Code</th>
+                        <th>Subject Description</th>
+                        <th>Units</th>
+                        <th>Grade Input</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>SIA 302</td>
+                        <td>Systems Integration Architecture</td>
+                        <td>3.0</td>
+                        <td><input type="number" placeholder="1.0-5.0" style="width: 80px;"></td>
+                    </tr>
+                    <tr>
+                        <td>IAS302</td>
+                        <td>Information Assurance & Security</td>
+                        <td>3.0</td>
+                        <td><input type="number" placeholder="1.0=5.0" style="width: 80px;"></td>
+                    </tr>
+                    <tr>
+                        <td>SA 301</td>
+                        <td>Software Architecture</td>
+                        <td>3.0</td>
+                        <td><input type="number" placeholder="1.0-5.0" style="width: 80px;"></td>
+                    </tr>
+                    <tr>
+                        <td>IT ELECTIVE 3</td>
+                        <td>Information Technology Elective III</td>
+                        <td>3.0</td>
+                        <td><input type="number" placeholder="1.0-5.0" style="width: 80px;"></td>
+                    </tr>
+                    <tr>
+                        <td>IT ELECTIVE 4</td>
+                        <td>Information Technology Elective IV</td>
+                        <td>3.0</td>
+                        <td><input type="number" placeholder="1.0-5.0" style="width: 80px;"></td>
+                    </tr>
+                    <tr>
+                        <td>CAPSTONE 301</td>
+                        <td>Capstone Project I</td>
+                        <td>4.0</td>
+                        <td><input type="number" placeholder="1.0-5.0" style="width: 80px;"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-bar">
+            
+            <button class="cyber-btn secondary" onclick="resetForm()">Reset</button>
+            <button class="cyber-btn secondary" onclick="window.print()">Print Student Record</button>
+            <button class="cyber-btn" onclick="toggleView()">View Grades</button>
+    
+        
+        </div>
+
+<!-- View Grades Section (Hidden by default) -->
+<div id="viewGradesSection">
+    <h3 class="panel-title" style="border-color: #fff; color: #fff;">Student Transcript View</h3>
+    <div class="result" id="result"></div>
+    <div class="note">
+    <div class="result" id="result"></div>
+    
+    <div class="grade-summary">
+        <!-- Card 1 -->
+        <div class="grade-card" id="card1">
+            <h4>SIA 302</h4>
+            <!-- Input for Grade Point -->
+            <select class="grade-input" onchange="updateCard('card1')">
+                <option value="" disabled selected>Select Grade</option>
+                <option value="1.0">1.0 (Excellent)</option>
+                <option value="1.1">1.1 (Highly Outstanding)</option>
+                <option value="1.2">1.2 (Highly Outstanding)</option>
+                <option value="1.3">1.3 (Highly Outstanding)</option>
+                <option value="1.4">1.4 (Outstanding)</option>
+                <option value="1.5">1.5 (Outstanding)</option>
+                <option value="1.6">1.6 (Outstanding)</option>
+                <option value="1.7">1.7 (Very Good)</option>
+                <option value="1.8">1.8 (Very Good)</option>
+                <option value="1.9">1.9 (Good)</option>
+                <option value="2.0">2.0 (Good)</option>
+                <option value="2.1">2.1 (Very Satisfactory)</option>
+                <option value="2.2">2.2 (Very Satisfactory)</option>
+                <option value="2.3">2.3 (Satisfactory)</option>
+                <option value="2.4">2.4 (Satisfactory)</option>
+                <option value="2.5">2.5 (Satisfactory)</option>
+                <option value="2.6">2.6 (Fairly Satisfactory)</option>
+                <option value="2.7">2.7 (Fairly Satisfactory)</option>
+                <option value="2.8">2.8 (Fairly Satisfactory)</option>
+                <option value="2.9">2.9 (Passing)</option>
+                <option value="3.0">3.0 (Passing)</option>
+                <option value="5.0">5.0 (Failing)</option>
+            </select>
+            <div class="grade-value"></div>
+            <div class="grade-remark">Select a grade to see equivalent</div>
+        </div>
+
+        <!-- Card 2 -->
+        <div class="grade-card" id="card2">
+            <h4>IAS302</h4>
+            <select class="grade-input" onchange="updateCard('card2')">
+                <option value="" disabled selected>Select Grade</option>
+                <option value="1.0">1.0 (Excellent)</option>
+                <option value="1.1">1.1 (Highly Outstanding)</option>
+                <option value="1.2">1.2 (Highly Outstanding)</option>
+                <option value="1.3">1.3 (Highly Outstanding)</option>
+                <option value="1.4">1.4 (Outstanding)</option>
+                <option value="1.5">1.5 (Outstanding)</option>
+                <option value="1.6">1.6 (Outstanding)</option>
+                <option value="1.7">1.7 (Very Good)</option>
+                <option value="1.8">1.8 (Very Good)</option>
+                <option value="1.9">1.9 (Good)</option>
+                <option value="2.0">2.0 (Good)</option>
+                <option value="2.1">2.1 (Very Satisfactory)</option>
+                <option value="2.2">2.2 (Very Satisfactory)</option>
+                <option value="2.3">2.3 (Satisfactory)</option>
+                <option value="2.4">2.4 (Satisfactory)</option>
+                <option value="2.5">2.5 (Satisfactory)</option>
+                <option value="2.6">2.6 (Fairly Satisfactory)</option>
+                <option value="2.7">2.7 (Fairly Satisfactory)</option>
+                <option value="2.8">2.8 (Fairly Satisfactory)</option>
+                <option value="2.9">2.9 (Passing)</option>
+                <option value="3.0">3.0 (Passing)</option>
+                <option value="5.0">5.0 (Failing)</option>
+            </select>
+            <div class="grade-value"></div>
+            <div class="grade-remark">Select a grade to see equivalent</div>
+        </div>
+
+        <!-- Card 3 -->
+        <div class="grade-card" id="card3">
+            <h4>SA 301</h4>
+            <select class="grade-input" onchange="updateCard('card3')">
+                <option value="" disabled selected>Select Grade</option>
+                <option value="1.0">1.0 (Excellent)</option>
+                <option value="1.1">1.1 (Highly Outstanding)</option>
+                <option value="1.2">1.2 (Highly Outstanding)</option>
+                <option value="1.3">1.3 (Highly Outstanding)</option>
+                <option value="1.4">1.4 (Outstanding)</option>
+                <option value="1.5">1.5 (Outstanding)</option>
+                <option value="1.6">1.6 (Outstanding)</option>
+                <option value="1.7">1.7 (Very Good)</option>
+                <option value="1.8">1.8 (Very Good)</option>
+                <option value="1.9">1.9 (Good)</option>
+                <option value="2.0">2.0 (Good)</option>
+                <option value="2.1">2.1 (Very Satisfactory)</option>
+                <option value="2.2">2.2 (Very Satisfactory)</option>
+                <option value="2.3">2.3 (Satisfactory)</option>
+                <option value="2.4">2.4 (Satisfactory)</option>
+                <option value="2.5">2.5 (Satisfactory)</option>
+                <option value="2.6">2.6 (Fairly Satisfactory)</option>
+                <option value="2.7">2.7 (Fairly Satisfactory)</option>
+                <option value="2.8">2.8 (Fairly Satisfactory)</option>
+                <option value="2.9">2.9 (Passing)</option>
+                <option value="3.0">3.0 (Passing)</option>
+                <option value="5.0">5.0 (Failing)</option>
+            </select>
+            <div class="grade-value"></div>
+            <div class="grade-remark">Select a grade to see equivalent</div>
+        </div>
+
+        <!-- Card 4 -->
+        <div class="grade-card" id="card4">
+            <h4>IT ELECTIVE 3</h4>
+            <select class="grade-input" onchange="updateCard('card4')">
+                <option value="" disabled selected>Select Grade</option>
+                <option value="1.0">1.0 (Excellent)</option>
+                <option value="1.1">1.1 (Highly Outstanding)</option>
+                <option value="1.2">1.2 (Highly Outstanding)</option>
+                <option value="1.3">1.3 (Highly Outstanding)</option>
+                <option value="1.4">1.4 (Outstanding)</option>
+                <option value="1.5">1.5 (Outstanding)</option>
+                <option value="1.6">1.6 (Outstanding)</option>
+                <option value="1.7">1.7 (Very Good)</option>
+                <option value="1.8">1.8 (Very Good)</option>
+                <option value="1.9">1.9 (Good)</option>
+                <option value="2.0">2.0 (Good)</option>
+                <option value="2.1">2.1 (Very Satisfactory)</option>
+                <option value="2.2">2.2 (Very Satisfactory)</option>
+                <option value="2.3">2.3 (Satisfactory)</option>
+                <option value="2.4">2.4 (Satisfactory)</option>
+                <option value="2.5">2.5 (Satisfactory)</option>
+                <option value="2.6">2.6 (Fairly Satisfactory)</option>
+                <option value="2.7">2.7 (Fairly Satisfactory)</option>
+                <option value="2.8">2.8 (Fairly Satisfactory)</option>
+                <option value="2.9">2.9 (Passing)</option>
+                <option value="3.0">3.0 (Passing)</option>
+                <option value="5.0">5.0 (Failing)</option>
+            </select>
+            <div class="grade-value"></div>
+            <div class="grade-remark">Select a grade to see equivalent</div>
+        </div>
+
+        <!-- Card 5 -->
+        <div class="grade-card" id="card5">
+            <h4>IT ELECTIVE 4</h4>
+            <select class="grade-input" onchange="updateCard('card5')">
+                <option value="" disabled selected>Select Grade</option>
+                <option value="1.0">1.0 (Excellent)</option>
+                <option value="1.1">1.1 (Highly Outstanding)</option>
+                <option value="1.2">1.2 (Highly Outstanding)</option>
+                <option value="1.3">1.3 (Highly Outstanding)</option>
+                <option value="1.4">1.4 (Outstanding)</option>
+                <option value="1.5">1.5 (Outstanding)</option>
+                <option value="1.6">1.6 (Outstanding)</option>
+                <option value="1.7">1.7 (Very Good)</option>
+                <option value="1.8">1.8 (Very Good)</option>
+                <option value="1.9">1.9 (Good)</option>
+                <option value="2.0">2.0 (Good)</option>
+                <option value="2.1">2.1 (Very Satisfactory)</option>
+                <option value="2.2">2.2 (Very Satisfactory)</option>
+                <option value="2.3">2.3 (Satisfactory)</option>
+                <option value="2.4">2.4 (Satisfactory)</option>
+                <option value="2.5">2.5 (Satisfactory)</option>
+                <option value="2.6">2.6 (Fairly Satisfactory)</option>
+                <option value="2.7">2.7 (Fairly Satisfactory)</option>
+                <option value="2.8">2.8 (Fairly Satisfactory)</option>
+                <option value="2.9">2.9 (Passing)</option>
+                <option value="3.0">3.0 (Passing)</option>
+                <option value="5.0">5.0 (Failing)</option>
+            </select>
+            <div class="grade-value"></div>
+            <div class="grade-remark">Select a grade to see equivalent</div>
+        </div>
+
+        <!-- Card 6 -->
+        <div class="grade-card" id="card6">
+            <h4>CAPSTONE 301</h4>
+            <select class="grade-input" onchange="updateCard('card6')">
+                <option value="" disabled selected>Select Grade</option>
+                <option value="1.0">1.0 (Excellent)</option>
+                <option value="1.1">1.1 (Highly Outstanding)</option>
+                <option value="1.2">1.2 (Highly Outstanding)</option>
+                <option value="1.3">1.3 (Highly Outstanding)</option>
+                <option value="1.4">1.4 (Outstanding)</option>
+                <option value="1.5">1.5 (Outstanding)</option>
+                <option value="1.6">1.6 (Outstanding)</option>
+                <option value="1.7">1.7 (Very Good)</option>
+                <option value="1.8">1.8 (Very Good)</option>
+                <option value="1.9">1.9 (Good)</option>
+                <option value="2.0">2.0 (Good)</option>
+                <option value="2.1">2.1 (Very Satisfactory)</option>
+                <option value="2.2">2.2 (Very Satisfactory)</option>
+                <option value="2.3">2.3 (Satisfactory)</option>
+                <option value="2.4">2.4 (Satisfactory)</option>
+                <option value="2.5">2.5 (Satisfactory)</option>
+                <option value="2.6">2.6 (Fairly Satisfactory)</option>
+                <option value="2.7">2.7 (Fairly Satisfactory)</option>
+                <option value="2.8">2.8 (Fairly Satisfactory)</option>
+                <option value="2.9">2.9 (Passing)</option>
+                <option value="3.0">3.0 (Passing)</option>
+                <option value="5.0">5.0 (Failing)</option>
+            </select>
+            <div class="grade-value"></div>
+            <div class="grade-remark">Select a grade to see equivalent</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- DATABASE: LocalStorage-based Student Database ---
+    const DB_NAME = 'PCC_SOICT_GradingSystem';
+    const STUDENTS_KEY = 'students_db';
+    const SUBJECTS_KEY = 'subjects_db';
+
+    // Initialize database
+    function initDatabase() {
+        // Load subjects or use defaults
+        let storedSubjects = localStorage.getItem(SUBJECTS_KEY);
+        if (storedSubjects) {
+            subjects = JSON.parse(storedSubjects);
+        } else {
+            subjects = [
+                { code: "SIA 302", desc: "Systems Integration Architecture", units: 3.0 },
+                { code: "IAS302", desc: "Information Assurance & Security", units: 3.0 },
+                { code: "SA 301", desc: "Software Architecture", units: 3.0 },
+                { code: "IT ELECTIVE 3", desc: "Information Technology Elective III", units: 3.0 },
+                { code: "IT ELECTIVE 4", desc: "Information Technology Elective IV", units: 3.0 },
+                { code: "CAPSTONE 301", desc: "Capstone Project I", units: 4.0 }
+            ];
+            localStorage.setItem(SUBJECTS_KEY, JSON.stringify(subjects));
+        }
+    }
+
+    // Get all students from database
+    function getAllStudents() {
+        let students = localStorage.getItem(STUDENTS_KEY);
+        return students ? JSON.parse(students) : [];
+    }
+
+    // Save student to database
+    function saveStudentToDB(student) {
+        let students = getAllStudents();
+        // Check if student ID already exists
+        let existingIndex = students.findIndex(s => s.id === student.id);
+        if (existingIndex >= 0) {
+            students[existingIndex] = student;
+        } else {
+            students.push(student);
+        }
+        localStorage.setItem(STUDENTS_KEY, JSON.stringify(students));
+        return true;
+    }
+
+    // Delete student from database
+    function deleteStudentFromDB(studentId) {
+        let students = getAllStudents();
+        students = students.filter(s => s.id !== studentId);
+        localStorage.setItem(STUDENTS_KEY, JSON.stringify(students));
+    }
+
+    // Search students
+    function searchStudents(query) {
+        let students = getAllStudents();
+        query = query.toLowerCase();
+        return students.filter(s => 
+            s.name.toLowerCase().includes(query) || 
+            s.id.toLowerCase().includes(query) ||
+            s.section.toLowerCase().includes(query)
+        );
+    }
+
+    // --- Subject Data ---
+    let subjects = [];
+
+    // --- Grade Mapping Data ---
+    const gradeData = {
+        "1.0": { range: "95-100", remark: "Excellent", status: "Passed" },
+        "1.1": { range: "92-94", remark: "Highly Outstanding", status: "Passed" },
+        "1.2": { range: "92-94", remark: "Highly Outstanding", status: "Passed" },
+        "1.3": { range: "92-94", remark: "Highly Outstanding", status: "Passed" },
+        "1.4": { range: "89-91", remark: "Outstanding", status: "Passed" },
+        "1.5": { range: "89-91", remark: "Outstanding", status: "Passed" },
+        "1.6": { range: "89-91", remark: "Outstanding", status: "Passed" },
+        "1.7": { range: "87-88", remark: "Very Good", status: "Passed" },
+        "1.8": { range: "87-88", remark: "Very Good", status: "Passed" },
+        "1.9": { range: "85-86", remark: "Good", status: "Passed" },
+        "2.0": { range: "85-86", remark: "Good", status: "Passed" },
+        "2.1": { range: "83-84", remark: "Very Satisfactory", status: "Passed" },
+        "2.2": { range: "83-84", remark: "Very Satisfactory", status: "Passed" },
+        "2.3": { range: "80-82", remark: "Satisfactory", status: "Passed" },
+        "2.4": { range: "80-82", remark: "Satisfactory", status: "Passed" },
+        "2.5": { range: "80-82", remark: "Satisfactory", status: "Passed" },
+        "2.6": { range: "77-79", remark: "Fairly Satisfactory", status: "Passed" },
+        "2.7": { range: "77-79", remark: "Fairly Satisfactory", status: "Passed" },
+        "2.8": { range: "77-79", remark: "Fairly Satisfactory", status: "Passed" },
+        "2.9": { range: "75-76", remark: "Passing", status: "Passed" },
+        "3.0": { range: "75-76", remark: "Passing", status: "Passed" },
+        "5.0": { range: "74 & Below", remark: "Failing", status: "Failed" }
+    };
+
+    // --- Toggle View Grades Section ---
+    function toggleView() {
+        var section = document.getElementById("viewGradesSection");
+        if (section.style.display === "none" || section.style.display === "") {
+            section.style.display = "block";
+        } else {
+            section.style.display = "none";
+        }
+    }
+
+    // --- Update Card with Grade Info ---
+    function updateCard(cardId) {
+        const card = document.getElementById(cardId);
+        const select = card.querySelector('.grade-input');
+        const gradeValue = select.value;
+        
+        if (gradeData[gradeValue]) {
+            const data = gradeData[gradeValue];
+            card.querySelector('.grade-value').textContent = gradeValue;
+            card.querySelector('.grade-remark').textContent = data.remark + " - " + data.range;
+            card.dataset.status = data.status;
+            card.dataset.remark = data.remark;
+        }
+    }
+
+    // --- Add Subject Function ---
+    function addSubject() {
+        const subjectInput = document.getElementById('subjectInput');
+        const subjectName = subjectInput.value.trim();
+        
+        if (!subjectName) {
+            alert('Please enter a subject name');
+            return;
+        }
+
+        // Generate a simple subject code
+        const subjectCode = "SUBJ " + (subjects.length + 1);
+        
+        // Add to subjects array
+        subjects.push({ code: subjectCode, desc: subjectName, units: 3.0 });
+        
+        // Save to database
+        localStorage.setItem(SUBJECTS_KEY, JSON.stringify(subjects));
+        
+        // Update the table
+        renderSubjectsTable();
+        
+        // Update the view grades section
+        renderGradesCards();
+        
+        // Clear input
+        subjectInput.value = '';
+        
+        alert('Subject "' + subjectName + '" added to database!');
+    }
+
+    // --- Delete Subject Function ---
+    function deleteSubject(index) {
+        if (confirm('Are you sure you want to delete this subject?')) {
+            subjects.splice(index, 1);
+            // Save to database
+            localStorage.setItem(SUBJECTS_KEY, JSON.stringify(subjects));
+            renderSubjectsTable();
+            renderGradesCards();
+            alert('Subject deleted from database!');
+        }
+    }
+
+    // --- Render Subjects Table ---
+    function renderSubjectsTable() {
+        const tbody = document.querySelector('.subjects-panel table tbody');
+        tbody.innerHTML = '';
+        
+        subjects.forEach((subject, index) => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${subject.code}</td>
+                <td>${subject.desc}</td>
+                <td>${subject.units}</td>
+                <td><input type="number" placeholder="1.0-5.0" style="width: 80px;" min="1.0" max="5.0" step="0.1"></td>
+                <td><button class="delete-btn" onclick="deleteSubject(${index})" style="background:#ff003c;color:#fff;border:none;padding:5px 10px;cursor:pointer;border-radius:3px;">X</button></td>
+            `;
+            tbody.appendChild(row);
+        });
+    }
+
+    // --- Render Grades Cards ---
+    function renderGradesCards() {
+        const container = document.querySelector('.grade-summary');
+        container.innerHTML = '';
+        
+        subjects.forEach((subject, index) => {
+            const cardId = 'card' + (index + 1);
+            const card = document.createElement('div');
+            card.className = 'grade-card';
+            card.id = cardId;
+            card.innerHTML = `
+                <h4>${subject.code}</h4>
+                <select class="grade-input" onchange="updateCard('${cardId}')">
+                    <option value="" disabled selected>Select Grade</option>
+                    <option value="1.0">1.0 (Excellent)</option>
+                    <option value="1.1">1.1 (Highly Outstanding)</option>
+                    <option value="1.2">1.2 (Highly Outstanding)</option>
+                    <option value="1.3">1.3 (Highly Outstanding)</option>
+                    <option value="1.4">1.4 (Outstanding)</option>
+                    <option value="1.5">1.5 (Outstanding)</option>
+                    <option value="1.6">1.6 (Outstanding)</option>
+                    <option value="1.7">1.7 (Very Good)</option>
+                    <option value="1.8">1.8 (Very Good)</option>
+                    <option value="1.9">1.9 (Good)</option>
+                    <option value="2.0">2.0 (Good)</option>
+                    <option value="2.1">2.1 (Very Satisfactory)</option>
+                    <option value="2.2">2.2 (Very Satisfactory)</option>
+                    <option value="2.3">2.3 (Satisfactory)</option>
+                    <option value="2.4">2.4 (Satisfactory)</option>
+                    <option value="2.5">2.5 (Satisfactory)</option>
+                    <option value="2.6">2.6 (Fairly Satisfactory)</option>
+                    <option value="2.7">2.7 (Fairly Satisfactory)</option>
+                    <option value="2.8">2.8 (Fairly Satisfactory)</option>
+                    <option value="2.9">2.9 (Passing)</option>
+                    <option value="3.0">3.0 (Passing)</option>
+                    <option value="5.0">5.0 (Failing)</option>
+                </select>
+                <div class="grade-value"></div>
+                <div class="grade-remark">Select a grade to see equivalent</div>
+            `;
+            container.appendChild(card);
+        });
+    }
+
+    // --- Save Record ---
+    function saveRecord() {
+        const name = document.getElementById('studentName').value;
+        const section = document.getElementById('studentSection').value;
+        const studentId = document.getElementById('studentId').value;
+        const academicYear = document.getElementById('academicYear').value;
+        
+        if (!name || !studentId) {
+            alert('Please enter student name and ID');
+            return;
+        }
+        
+        // Collect grades from the table
+        const gradeInputs = document.querySelectorAll('.subjects-panel table tbody input[type="number"]');
+        const studentGrades = [];
+        subjects.forEach((subject, index) => {
+            const grade = gradeInputs[index] ? gradeInputs[index].value : '';
+            if (grade) {
+                studentGrades.push({
+                    code: subject.code,
+                    desc: subject.desc,
+                    units: subject.units,
+                    grade: grade,
+                    gradeData: gradeData[grade] || null
+                });
+            }
+        });
+        
+        // Create student object
+        const student = {
+            id: studentId,
+            name: name,
+            section: section,
+            academicYear: academicYear,
+            grades: studentGrades,
+            savedAt: new Date().toISOString()
+        };
+        
+        // Save to database
+        saveStudentToDB(student);
+        
+        alert('Record saved successfully for: ' + name + ' (ID: ' + studentId + ')\nGrades saved: ' + studentGrades.length + ' subjects');
+    }
+
+    // --- Edit Record ---
+    function editRecord() {
+        const studentId = document.getElementById('studentId').value;
+        if (!studentId) {
+            alert('Please enter a Student ID to search');
+            return;
+        }
+        
+        const students = getAllStudents();
+        const student = students.find(s => s.id === studentId);
+        
+        if (student) {
+            // Load student data
+            document.getElementById('studentName').value = student.name;
+            document.getElementById('studentSection').value = student.section;
+            document.getElementById('studentId').value = student.id;
+            document.getElementById('academicYear').value = student.academicYear;
+            
+            // Load grades into table
+            const gradeInputs = document.querySelectorAll('.subjects-panel table tbody input[type="number"]');
+            student.grades.forEach((grade, index) => {
+                if (gradeInputs[index]) {
+                    gradeInputs[index].value = grade.grade;
+                }
+            });
+            
+            alert('Record loaded for: ' + student.name);
+        } else {
+            alert('Student not found with ID: ' + studentId);
+        }
+    }
+
+    // --- Delete Record ---
+    function deleteRecord() {
+        const studentId = document.getElementById('studentId').value;
+        if (!studentId) {
+            alert('Please enter a Student ID to delete');
+            return;
+        }
+        
+        if (confirm('Are you sure you want to delete the record with ID: ' + studentId + '?')) {
+            deleteStudentFromDB(studentId);
+            resetForm();
+            alert('Record deleted from database');
+        }
+    }
+
+    // --- Reset Form ---
+    function resetForm() {
+        document.getElementById('studentName').value = '';
+        document.getElementById('studentSection').value = '';
+        document.getElementById('studentId').value = '';
+        document.getElementById('academicYear').value = '';
+        document.getElementById('subjectInput').value = '';
+        
+        document.querySelectorAll('.subjects-panel input[type="number"]').forEach(input => input.value = '');
+        document.querySelectorAll('.grade-card').forEach(card => {
+            card.querySelector('.grade-input').selectedIndex = 0;
+            card.querySelector('.grade-value').textContent = '';
+            card.querySelector('.grade-remark').textContent = 'Select a grade to see equivalent';
+        });
+    }
+
+    // Initialize on load
+    window.onload = function() {
+        initDatabase();
+        renderSubjectsTable();
+        renderGradesCards();
+    };
+</script>
+</body>
+</html>
