@@ -258,11 +258,29 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
+        /* Component Inputs & Calc Cells */
+        .component-input {
+            width: 60px !important;
+            padding: 5px !important;
+        }
+        .calc-cell {
+            font-weight: bold;
+            color: var(--neon-red);
+            font-family: var(--font-mono);
+        }
+        .calc-perc { background: rgba(255, 0, 60, 0.1); }
+        th:nth-child(n+4):nth-child(-n+11) { padding: 10px 5px; font-size: 0.8rem; }
+        td:nth-child(n+4):nth-child(-n+11) { padding: 10px 5px; }
+        
         /* Responsive */
+        @media (max-width: 1200px) {
+            table { font-size: 0.85rem; }
+        }
         @media (max-width: 768px) {
             .student-info { grid-template-columns: 1fr; }
             .action-bar { flex-direction: column; }
             .cyber-btn { width: 100%; text-align: center; }
+            table { display: block; overflow-x: auto; white-space: nowrap; }
         }
         style>
   body {
@@ -342,11 +360,18 @@
             <h3 class="panel-title">Subject Grade Entry</h3>
             <table>
                 <thead>
-                    <tr>
+<tr>
                         <th>Subject Code</th>
-                        <th>Subject Description</th>
+                        <th>Description</th>
                         <th>Units</th>
-                        <th>Grade Input</th>
+                        <th>Quiz (20%)</th>
+                        <th>Lab (30%)</th>
+                        <th>Assign (10%)</th>
+                        <th>Attend (10%)</th>
+                        <th>Major (30%)</th>
+                        <th>Calc %</th>
+                        <th>Remark</th>
+                        <th>Equiv</th>
                         <th>Action</th>
                     </tr>
                 </thead>
@@ -355,7 +380,14 @@
                         <td>SIA 302</td>
                         <td>Systems Integration Architecture</td>
                         <td>3.0</td>
-                        <td><input type="number" placeholder="1.0-5.0" style="width: 80px;"></td>
+<td><input type="number" min="0" max="100" placeholder="0-100" style="width: 60px;" class="quiz-input" onchange="updateRowCalc(0)"></td>
+                        <td><input type="number" min="0" max="100" placeholder="0-100" style="width: 60px;" class="lab-input" onchange="updateRowCalc(0)"></td>
+                        <td><input type="number" min="0" max="100" placeholder="0-100" style="width: 60px;" class="assign-input" onchange="updateRowCalc(0)"></td>
+                        <td><input type="number" min="0" max="100" placeholder="0-100" style="width: 60px;" class="attend-input" onchange="updateRowCalc(0)"></td>
+                        <td><input type="number" min="0" max="100" placeholder="0-100" style="width: 60px;" class="major-input" onchange="updateRowCalc(0)"></td>
+                        <td class="calc-perc">-</td>
+                        <td class="calc-remark">-</td>
+                        <td class="calc-equiv">-</td>
                     </tr>
                     <tr>
                         <td>IAS302</td>
@@ -393,12 +425,9 @@
 
         <!-- Action Buttons -->
         <div class="action-bar">
-            
             <button class="cyber-btn secondary" onclick="resetForm()">Reset</button>
             <button class="cyber-btn secondary" onclick="window.print()">Print Student Record</button>
             <button class="cyber-btn" onclick="toggleView()">View Grades</button>
-    
-        
         </div>
 
 <!-- View Grades Section (Hidden by default) -->
@@ -696,7 +725,52 @@
         "5.0": { range: "74 & Below", remark: "Failing", status: "Failed" }
     };
 
-    // --- Toggle View Grades Section ---
+// --- GRADE CALCULATION FUNCTIONS ---
+// Calculate weighted grade average and map to equivalent
+function calcGrade(quiz, lab, assign, attend, major) {
+    const avg = (quiz * 0.2 + lab * 0.3 + assign * 0.1 + attend * 0.1 + major * 0.3);
+    const average = Math.round(avg * 100) / 100; // Round to 2 decimals
+
+    // Map average to equivalent grade based on standard ranges
+    let equiv = '5.0';
+    let remark = 'Failing';
+    if (average >= 95) { equiv = '1.0'; remark = 'Excellent'; }
+    else if (average >= 92) { equiv = '1.25'; remark = 'Highly Outstanding'; }
+    else if (average >= 89) { equiv = '1.5'; remark = 'Outstanding'; }
+    else if (average >= 87) { equiv = '1.75'; remark = 'Very Good'; }
+    else if (average >= 85) { equiv = '2.0'; remark = 'Good'; }
+    else if (average >= 83) { equiv = '2.15'; remark = 'Very Satisfactory'; }
+    else if (average >= 80) { equiv = '2.4'; remark = 'Satisfactory'; }
+    else if (average >= 77) { equiv = '2.7'; remark = 'Fairly Satisfactory'; }
+    else if (average >= 75) { equiv = '3.0'; remark = 'Passing'; }
+
+    return { average: average, equiv: equiv, remark: remark };
+}
+
+// Update specific row calculation
+function updateRowCalc(index) {
+    const rows = document.querySelectorAll('.subjects-panel table tbody tr');
+    const row = rows[index];
+    if (!row) return;
+
+    const inputs = row.querySelectorAll('.component-input');
+    if (inputs.length !== 5) return;
+
+    const quiz = parseFloat(inputs[0].value) || 0;
+    const lab = parseFloat(inputs[1].value) || 0;
+    const assign = parseFloat(inputs[2].value) || 0;
+    const attend = parseFloat(inputs[3].value) || 0;
+    const major = parseFloat(inputs[4].value) || 0;
+
+    const result = calcGrade(quiz, lab, assign, attend, major);
+
+    // Update cells
+    row.querySelector('.calc-perc').textContent = result.average.toFixed(2) + '%';
+    row.querySelector('.calc-remark').textContent = result.remark;
+    row.querySelector('.calc-equiv').textContent = result.equiv;
+}
+
+// --- Toggle View Grades Section ---
     function toggleView() {
         var section = document.getElementById("viewGradesSection");
         if (section.style.display === "none" || section.style.display === "") {
@@ -771,12 +845,20 @@
         
         subjects.forEach((subject, index) => {
             const row = document.createElement('tr');
+            row.dataset.index = index;
             row.innerHTML = `
                 <td>${subject.code}</td>
                 <td>${subject.desc}</td>
                 <td>${subject.units}</td>
-                <td><input type="number" placeholder="1.0-5.0" style="width: 80px;" min="1.0" max="5.0" step="0.1"></td>
-                <td><button class="delete-btn" onclick="deleteSubject(${index})" style="background:#ff003c;color:#fff;border:none;padding:5px 10px;cursor:pointer;border-radius:3px;">X</button></td>
+                <td><input type="number" class="component-input quiz-input" placeholder="0-100" min="0" max="100" onchange="updateRowCalc(${index})"></td>
+                <td><input type="number" class="component-input lab-input" placeholder="0-100" min="0" max="100" onchange="updateRowCalc(${index})"></td>
+                <td><input type="number" class="component-input assign-input" placeholder="0-100" min="0" max="100" onchange="updateRowCalc(${index})"></td>
+                <td><input type="number" class="component-input attend-input" placeholder="0-100" min="0" max="100" onchange="updateRowCalc(${index})"></td>
+                <td><input type="number" class="component-input major-input" placeholder="0-100" min="0" max="100" onchange="updateRowCalc(${index})"></td>
+                <td class="calc-perc calc-cell">-</td>
+                <td class="calc-remark calc-cell">-</td>
+                <td class="calc-equiv calc-cell">-</td>
+                <td><button class="delete-btn" onclick="deleteSubject(${index})" style="background:#ff003c;color:#fff;border:none;padding:5px 10px;cursor:pointer;border-radius:3px;font-size:0.8rem;">X</button></td>
             `;
             tbody.appendChild(row);
         });
@@ -838,19 +920,30 @@
             return;
         }
         
-        // Collect grades from the table
-        const gradeInputs = document.querySelectorAll('.subjects-panel table tbody input[type="number"]');
+        // Collect components from table (5 inputs per row)
+        const rows = document.querySelectorAll('.subjects-panel table tbody tr');
         const studentGrades = [];
-        subjects.forEach((subject, index) => {
-            const grade = gradeInputs[index] ? gradeInputs[index].value : '';
-            if (grade) {
-                studentGrades.push({
-                    code: subject.code,
-                    desc: subject.desc,
-                    units: subject.units,
-                    grade: grade,
-                    gradeData: gradeData[grade] || null
-                });
+        rows.forEach((row, sIndex) => {
+            if (subjects[sIndex]) {
+                const inputs = row.querySelectorAll('.component-input');
+                if (inputs.length === 5) {
+                    const components = {
+                        quiz: parseFloat(inputs[0].value) || 0,
+                        lab: parseFloat(inputs[1].value) || 0,
+                        assign: parseFloat(inputs[2].value) || 0,
+                        attend: parseFloat(inputs[3].value) || 0,
+                        major: parseFloat(inputs[4].value) || 0
+                    };
+                    const calcResult = calcGrade(components.quiz, components.lab, components.assign, components.attend, components.major);
+                    const calc = calcResult.average;
+                    studentGrades.push({
+                        code: subjects[sIndex].code,
+                        desc: subjects[sIndex].desc,
+                        units: subjects[sIndex].units,
+                        components: components,
+                        calc: calc
+                    });
+                }
             }
         });
         
@@ -888,11 +981,18 @@
             document.getElementById('studentId').value = student.id;
             document.getElementById('academicYear').value = student.academicYear;
             
-            // Load grades into table
-            const gradeInputs = document.querySelectorAll('.subjects-panel table tbody input[type="number"]');
-            student.grades.forEach((grade, index) => {
-                if (gradeInputs[index]) {
-                    gradeInputs[index].value = grade.grade;
+            // Load components into table
+            renderSubjectsTable(); // Ensure full structure
+            student.grades.forEach((grade, sIndex) => {
+                const row = document.querySelectorAll('.subjects-panel tbody tr')[sIndex];
+                if (row && grade.components) {
+                    const inputs = row.querySelectorAll('.component-input');
+                    inputs[0].value = grade.components.quiz || '';
+                    inputs[1].value = grade.components.lab || '';
+                    inputs[2].value = grade.components.assign || '';
+                    inputs[3].value = grade.components.attend || '';
+                    inputs[4].value = grade.components.major || '';
+                    updateRowCalc(sIndex);
                 }
             });
             
@@ -939,6 +1039,7 @@
         renderSubjectsTable();
         renderGradesCards();
     };
+
 </script>
 </body>
 </html>
